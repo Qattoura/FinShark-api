@@ -1,0 +1,29 @@
+ 
+# .NET build outputs
+bin/
+obj/
+
+# User-specific files
+*.user
+*.userosscache
+*.sln.docstates
+
+# IDE files
+.vs/
+*.swp
+*~
+
+# Visual Studio Code
+.vscode/
+
+# Package files
+packages/
+
+# Local development environment files
+appsettings.Development.json
+
+# Optional: Test results
+TestResults/
+
+# Optional: Rider IDE
+.idea/
