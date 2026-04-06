@@ -11,8 +11,8 @@ namespace FinShark.api.Data
 
         }
        
-        public DbSet<Stock> stock {  get; set; }
-        public DbSet<Comment> comments { get; set; }
+        public DbSet<Stock> Stocks {  get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
 
     }
