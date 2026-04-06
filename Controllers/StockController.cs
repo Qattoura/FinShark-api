@@ -40,6 +40,8 @@ namespace FinShark.api.Controllers
             return Ok(stock.ToStockDto());   
         }
 
+
+        // Post Method
         [HttpPost]
         public IActionResult Create([FromBody] CreateStockRequestDto stockDto) 
         {
@@ -50,6 +52,46 @@ namespace FinShark.api.Controllers
 
         }
 
+        [HttpPut]
+        [Route("{id}")]
+        public IActionResult Update([FromRoute] int id , [FromBody] UpdateStockRequestDto updateDto)
+        {
+            var stockModel = _Context.Stocks.FirstOrDefault(s => s.Id == id);
+
+            if(stockModel == null) 
+            {
+                return NotFound();
+            }
+
+            stockModel.Symbol = updateDto.Symbol;
+            stockModel.Purchase = updateDto.Purchase;
+            stockModel.MarketCap = updateDto.MarketCap;
+            stockModel.LastDiv = updateDto.LastDiv;
+            stockModel.CompanyName = updateDto.CompanyName;
+            stockModel.Industry = updateDto.Industry;
+
+            _Context.SaveChanges();
+
+            return Ok(stockModel.ToStockDto() );
+
+        }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public IActionResult Delete([FromRoute] int id) 
+        {
+            var stockModel = _Context.Stocks.FirstOrDefault(x => x.Id == id);
+
+            if (stockModel == null)
+            {
+                return NotFound();
+            }
+
+            _Context.Stocks.Remove(stockModel);
+            _Context.SaveChanges();
+            return NoContent();
+
+        }
 
     }
 }
