@@ -20,5 +20,31 @@ namespace FinShark.api.Mappers
 
         }
 
+        public static Comment ToComment(this CreateCommentDto commentDto, int stockId)
+        {
+            return new Comment
+            {
+                Title = commentDto.Title,
+                Content = commentDto.Content,
+                StockId = stockId
+
+
+            };
+
+        }
+
+
+        public static Comment ToComment(this UpdateCommentDto commentDto)
+        {
+            return new Comment
+            {
+                Title = commentDto.Title,
+                Content = commentDto.Content
+
+
+            };
+
+        }
+
     }
 }
