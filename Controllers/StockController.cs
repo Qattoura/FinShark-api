@@ -1,7 +1,9 @@
 ﻿using FinShark.api.Data;
 using FinShark.api.Dtos.Stock;
+using FinShark.api.Interfaces;
 using FinShark.api.Mappers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 
 
@@ -13,23 +15,26 @@ namespace FinShark.api.Controllers
     public class StockController : ControllerBase
     {
         private readonly ApplicationDBContext _Context;
-        public StockController(ApplicationDBContext context)
+        private readonly IStockRepository _stockRepo;
+        public StockController(ApplicationDBContext context, IStockRepository stockRepo)
         {
+            _stockRepo = stockRepo;
             _Context = context;
         }
 
         [HttpGet]
-        public IActionResult GetAll() 
+        public async Task<IActionResult> GetAll() 
         {
-            var stock = _Context.Stocks.ToList()
-                .Select(s => s.ToStockDto());
-            return Ok(stock);
+            var stock = await _stockRepo.GetAllAsync();
+
+            var stockDto = stock.Select(s => s.ToStockDto());
+            return Ok(stockDto);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById([FromRoute] int id)
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var stock = _Context.Stocks.Find(id);
+            var stock = await _stockRepo.GetByIdAsync(id);
 
             if (stock == null)
             {
@@ -43,34 +48,24 @@ namespace FinShark.api.Controllers
 
         // Post Method
         [HttpPost]
-        public IActionResult Create([FromBody] CreateStockRequestDto stockDto) 
+        public async Task<IActionResult> Create([FromBody] CreateStockRequestDto stockDto) 
         {
             var stockModel = stockDto.ToStockFromCreateDto();
-            _Context.Stocks.Add(stockModel);
-            _Context.SaveChanges();
+            await _stockRepo.CreateAsync(stockModel);
             return CreatedAtAction(nameof(GetById), new {id = stockModel.Id}, stockModel.ToStockDto());
 
         }
 
         [HttpPut]
         [Route("{id}")]
-        public IActionResult Update([FromRoute] int id , [FromBody] UpdateStockRequestDto updateDto)
+        public async Task<IActionResult> Update([FromRoute] int id , [FromBody] UpdateStockRequestDto updateDto)
         {
-            var stockModel = _Context.Stocks.FirstOrDefault(s => s.Id == id);
+            var stockModel = await _stockRepo.UpdateAsync(id,updateDto);
 
             if(stockModel == null) 
             {
                 return NotFound();
             }
-
-            stockModel.Symbol = updateDto.Symbol;
-            stockModel.Purchase = updateDto.Purchase;
-            stockModel.MarketCap = updateDto.MarketCap;
-            stockModel.LastDiv = updateDto.LastDiv;
-            stockModel.CompanyName = updateDto.CompanyName;
-            stockModel.Industry = updateDto.Industry;
-
-            _Context.SaveChanges();
 
             return Ok(stockModel.ToStockDto() );
 
@@ -78,17 +73,15 @@ namespace FinShark.api.Controllers
 
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult Delete([FromRoute] int id) 
+        public async Task<IActionResult> Delete([FromRoute] int id) 
         {
-            var stockModel = _Context.Stocks.FirstOrDefault(x => x.Id == id);
+            var stockModel = await _stockRepo.DeleteAsync(id);
 
             if (stockModel == null)
             {
                 return NotFound();
             }
 
-            _Context.Stocks.Remove(stockModel);
-            _Context.SaveChanges();
             return NoContent();
 
         }
