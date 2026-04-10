@@ -24,6 +24,9 @@ namespace FinShark.api.Controllers
         public async Task<IActionResult> GetAll()
         {
 
+            if(!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var comments = await _commentRepo.GetAllAsync();
 
             var commentDto = comments.Select(s => s.ToCommentDto());
@@ -31,9 +34,12 @@ namespace FinShark.api.Controllers
             return Ok(commentDto);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var comment = await _commentRepo.GetByIdAsync(id);
 
             if(comment == null) 
@@ -44,11 +50,21 @@ namespace FinShark.api.Controllers
 
         }
 
-        [HttpPost("{stockId}")]
+        [HttpPost("{stockId:int}")]
         public async Task<IActionResult> Create([FromRoute] int stockId, CreateCommentDto createCommentDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            Console.WriteLine("----------------------------------------");
+
+            Console.WriteLine(await _stockRepo.IsStockExists(stockId));
+
+            Console.WriteLine("----------------------------------------");
+
             if (! await _stockRepo.IsStockExists(stockId))
             {
+                
                 return BadRequest("stock does not exist");
                 
             }
@@ -56,15 +72,18 @@ namespace FinShark.api.Controllers
             var commentModel = createCommentDto.ToComment(stockId);
             await _commentRepo.CreateAsync(commentModel);
 
-            return CreatedAtAction(nameof(GetById), new { id = commentModel }, commentModel.ToCommentDto());
+            return CreatedAtAction(nameof(GetById), new { id = commentModel.Id }, commentModel.ToCommentDto());
 
 
         }
 
         [HttpPut]
-        [Route("{id}")]
+        [Route("{id:int}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateCommentDto updateCommentDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var comment = await _commentRepo.UpdateAsync(id, updateCommentDto.ToComment());
             if (comment == null)
             {
@@ -75,10 +94,14 @@ namespace FinShark.api.Controllers
         }
 
         [HttpDelete]
-        [Route("{id}")]
+        [Route("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id) 
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var comment = await _commentRepo.DeleteAsync(id);
+
             if (comment == null)
             {
                 return NotFound("Comment does not found");
