@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FinShark.api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260126232112_init")]
-    partial class init
+    [Migration("20260412204348_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,7 +51,7 @@ namespace FinShark.api.Migrations
 
                     b.HasIndex("StockId");
 
-                    b.ToTable("comments");
+                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("FinShark.api.Models.Stock", b =>
@@ -85,16 +85,21 @@ namespace FinShark.api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("stock");
+                    b.ToTable("Stocks");
                 });
 
             modelBuilder.Entity("FinShark.api.Models.Comment", b =>
                 {
                     b.HasOne("FinShark.api.Models.Stock", "stock")
-                        .WithMany()
+                        .WithMany("Comments")
                         .HasForeignKey("StockId");
 
                     b.Navigation("stock");
+                });
+
+            modelBuilder.Entity("FinShark.api.Models.Stock", b =>
+                {
+                    b.Navigation("Comments");
                 });
 #pragma warning restore 612, 618
         }
